@@ -1,0 +1,9 @@
+The Vault is a web application that should allow users to securely exchange small files.
+
+It uses public key encryption. 
+
+Uses the following debian packages
+ libjson-perl 
+ libauthen-passphrase-perl  
+ libstring-random-perl 
+
