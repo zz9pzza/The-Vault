@@ -1,0 +1,5 @@
+[% image = site.logo -%]
+<a href="[% site.url.index %]"><img
+   src="[% image.src %]" alt="[% image.alt %]" 
+   width="[% image.width %]" height="[% image.height %]" 
+   border="0" /></a>

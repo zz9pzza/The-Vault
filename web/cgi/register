@@ -1,0 +1,19 @@
+#!/usr/bin/perl
+ 
+use strict;
+use warnings;
+ 
+use CGI  qw(:standard);
+use CGI::Carp qw(fatalsToBrowser);
+use JSON;
+
+$| = 1;
+
+print header('application/json');
+my $json = new JSON;
+$json = $json->pretty() ;
+$json = $json->ascii() ;
+my $jsonStructure;
+my $username = param('username');
+$jsonStructure->{result}="Username : $username";
+print  $json->encode($jsonStructure);

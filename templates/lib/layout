@@ -1,0 +1,15 @@
+[% MACRO line BLOCK -%]
+      [% PROCESS line %]
+[%- END %]
+ 
+      [% PROCESS header %]
+ 
+  [% line %]
+ 
+      <!-- page content -->
+      [% content %]
+      <!-- end of page content -->
+ 
+  [% line %]
+ 
+      [% PROCESS footer %]

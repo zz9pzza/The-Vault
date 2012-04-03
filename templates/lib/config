@@ -1,0 +1,46 @@
+[%  USE Date;
+ 
+    MACRO date(d) BLOCK;
+      # entry dates contain both date and 
+      # time, but we just want the date
+      items = d.split('-');
+      Date.format(
+        "0:00:00 $items.2/$items.1/$items.0"
+        format = '%d-%B-%Y'
+      );
+    END;
+ 
+    site = {
+      title     = "The Vault"
+      admin     = 'systems-discuss@transformativeworks.org'
+      copyright = '2012'
+    }
+ 
+    site.url = {
+      guide  = rootcgi
+      index  = "$rooturl/index"
+      images = "$rooturl/vault/images/"
+    }
+ 
+    site.col = {
+        back  = '#CDCDCD'  # white
+        text  = '#000000'  # black
+        line  = '#00AAF0'  # sky blue
+    }
+ 
+    site.logo = {
+      src    = "$site.url.images/otw-logobox-transparent.png"
+      alt    = "The Organization for Transformative Works"
+      width  = 189 
+      height = 162
+    }
+ 
+    page = {
+      name  = template.name
+      file  = template.name
+      title = template.title
+      about = template.about
+      type  = template.type or 'html'
+      date  = template.date or Date.format(template.modtime)
+    }
+-%]
