@@ -1,0 +1,4 @@
+CREATE USER 'vault'@'localhost' IDENTIFIED BY 'this_is_not_a_real_password' ;
+GRANT ALL PRIVILEGES ON vault.* TO 'vault'@'localhost' ;
+FLUSH PRIVILEGES;
+
