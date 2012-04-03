@@ -1,4 +1,18 @@
 CREATE USER 'vault'@'localhost' IDENTIFIED BY 'this_is_not_a_real_password' ;
 GRANT ALL PRIVILEGES ON vault.* TO 'vault'@'localhost' ;
 FLUSH PRIVILEGES;
+use vault;
+CREATE TABLE `user` (
+  `userid` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(512) DEFAULT NULL,
+  `salt` char(22) DEFAULT NULL,
+  `cost` int(11) DEFAULT '14',
+  `hash` char(31) DEFAULT NULL,
+  `email_address` varchar(512) DEFAULT NULL,
+  `timeout` int(11) DEFAULT '900',
+  `validation_string` char(32) DEFAULT NULL,
+  PRIMARY KEY (`userid`),
+  UNIQUE KEY `username` (`username`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 ;
+
 

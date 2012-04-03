@@ -7,6 +7,9 @@ use CGI  qw(:standard);
 use CGI::Carp qw(fatalsToBrowser);
 use String::Random;
 use Authen::Passphrase::BlowfishCrypt;
+use VaultDB::Schema  ;
+use Error qw(:try);
+
 
 use JSON;
 
@@ -16,17 +19,29 @@ my $passphrase=param('passphrase');
 
 
 my $ppr = Authen::Passphrase::BlowfishCrypt->new(
-                cost => 8, salt_random => 1,
+                cost => 14, salt_random => 1,
                 passphrase => $passphrase);
 
-my $salt=$ppr->salt;
-my $hash=$ppr->as_rfc2307;
+my $salt=$ppr->salt_base64;
+my $hash=$ppr->hash_base64;
 print header('application/json');
 my $json = new JSON;
 $json = $json->pretty() ;
 $json = $json->ascii() ;
+my $validation = new String::Random;
 my $jsonStructure;
-my $username = param('username');
-$jsonStructure->{result}="Username : $username,Salt : $salt,Hash : $hash";
+my $schema = VaultDB::Schema->connect('DBI:mysql:vault:localhost','vault','this_is_not_a_real_password');
+$jsonStructure->{result}="<p>Thank you for registering</p><br><p>You should recieve an email which will be used to validate your email address, you will not be able to log in until your address is validated</p>";
+try {
+my $new_user = $schema->resultset('User')->create({
+	username			=> param('username'),
+    salt            	=> $salt,
+    cost            	=> 14,
+    hash            	=> $hash,
+    validation_string	=> $validation->randregex('\w{32}'),
+    email_address   	=> param('email_address')
+  }); } otherwise  {
+			$jsonStructure->{result}="<p>An error has occured systems have been contacted please try again later</p>";
+			} ;
 
 print  $json->encode($jsonStructure);

@@ -5,17 +5,21 @@ use warnings;
  
 use CGI  qw(:standard);
 use CGI::Carp qw(fatalsToBrowser);
+use VaultDB::Schema  ;
 use JSON;
 
 $| = 1;
 
+ my $schema = VaultDB::Schema->connect('DBI:mysql:vault:localhost','vault','this_is_not_a_real_password');
 print header('application/json');
 my $json = new JSON;
 $json = $json->pretty() ;
 $json = $json->ascii() ;
 my $jsonStructure;
-my $username = url_param('username');
-if ( $username eq "james_" ) {
+my $username = param('username');
+my $search=$schema->resultset('User')->find({ username => $username } );
+
+if ( defined($search) ) {
 	$jsonStructure->{result}="User name in use";
 } else  {
 	$jsonStructure->{result}="User name available";

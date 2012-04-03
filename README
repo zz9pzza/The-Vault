@@ -6,4 +6,6 @@ Uses the following debian packages
  libjson-perl 
  libauthen-passphrase-perl  
  libstring-random-perl 
+ libdbix-class-perl
+ libdbix-class-schema-loader-perl
 

@@ -50,7 +50,7 @@ if ( isValidEmailAddress(\$('#email_address').val()) == 0 ) {
     return ;
    }
 \$('#Please_wait_dialog').dialog('open');
-\$.post('./register',{ username: \$('#username').val(), passphrase: \$('#passphrase').val(), email: \$('#email_address').val()},function(data){display_register(data)},'json');
+\$.post('./register',{ username: \$('#username').val(), passphrase: \$('#passphrase').val(), email_address: \$('#email_address').val()},function(data){display_register(data)},'json');
 }
 
 
@@ -60,13 +60,13 @@ if ( isValidEmailAddress(\$('#email_address').val()) == 0 ) {
 				\$('#passphrase').password_strength({container:'#strength'});
 				\$('#passphrase_repeat').bind('input', function() { check_passwords_equal()});
 				\$('#passphrase').bind('input', function() { check_passwords_equal()});
-				\$('#username').change(function() {\$.get('./check_unused_username',{ username: \$('#username').val()},function(data){check_username(data)},'json')  });
+				\$('#username').change(function() {\$.post('./check_unused_username',{ username: \$('#username').val()},function(data){check_username(data)},'json')  });
 				\$('#email_address').change(function() {isValidEmailAddress(\$('#email_address').val())});		
 "
 %]
 [%  dialogs= [ {name='Problem',option="title: 'Invalid data'"},
 			   {name='Please_wait',option="title: 'Registering'"},
-			   {name='Result',option="title: 'Registered'"} ] %]
+			   {name='Result',option="title: 'Registered',close: function() {window.location.reload()} "} ] %]
 [% FOREACH dialog IN dialogs %]
 [% SCRIPT="$SCRIPT
 				\$('div#${dialog.name}_dialog').dialog({
