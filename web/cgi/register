@@ -5,15 +5,28 @@ use warnings;
  
 use CGI  qw(:standard);
 use CGI::Carp qw(fatalsToBrowser);
+use String::Random;
+use Authen::Passphrase::BlowfishCrypt;
+
 use JSON;
 
 $| = 1;
 
+my $passphrase=param('passphrase');
+
+
+my $ppr = Authen::Passphrase::BlowfishCrypt->new(
+                cost => 8, salt_random => 1,
+                passphrase => $passphrase);
+
+my $salt=$ppr->salt;
+my $hash=$ppr->as_rfc2307;
 print header('application/json');
 my $json = new JSON;
 $json = $json->pretty() ;
 $json = $json->ascii() ;
 my $jsonStructure;
 my $username = param('username');
-$jsonStructure->{result}="Username : $username";
+$jsonStructure->{result}="Username : $username,Salt : $salt,Hash : $hash";
+
 print  $json->encode($jsonStructure);
