@@ -1,72 +1,31 @@
 [% LOAD="<script type='text/javascript' src='/vault/js/jquery.password_strength.js'></script>" %]
 
 [% SCRIPT="
-function isValidEmailAddress(emailAddress) {
-    var pattern = new RegExp(/^[a-zA-Z0-9_.-]+@[a-zA-Z0-9]+[a-zA-Z0-9.-]+[a-zA-Z0-9]+.[a-z]{1,4}$/i);
-    if(  pattern.test(emailAddress) ) {  
-		\$('#emailvalid').html('Valid email');
-		return 1 ; 
-	}  else {
-		\$('#emailvalid').html('Invalid email');
-		return 0 ;
-    }
-};
-function check_passwords_equal()
-{
-if (\$('#passphrase').val() == \$('#passphrase_repeat').val() )
-     \$('#duppassword').html('Password equal');
-else
-	 \$('#duppassword').html('Passwords different');
+
+function process_login(data) {
+\$('#Login_dialog').dialog('close');
+if ( data.error == 2 ) {
+  \$('#Not_Validated_dialog').dialog('open');
+  } else {
+   \$('#Result_text').html(data.result);
+   \$('#Result_dialog').dialog('open');
+  }
 }
 
-function check_username (data)
-{
-	\$('#userfree').html(data.result);
+function login () {
+\$.post('./login',{ username: \$('#login_username').val(), passphrase: \$('#login_passphrase').val()},function(data){process_login(data)},'json');
 }
 
-function display_register(data) 
-{
-\$('#Please_wait_dialog').dialog('close');
-\$('#Result_text').html(data.result);
-\$('#Result_dialog').dialog('open');
-}
-
-
-function register() {
-if ( \$('#passphrase').val() != \$('#passphrase_repeat').val() ) {
-    \$('#Problem_dialog').dialog('open');
-	return ;
-   }
-if ( \$('#strength').html() == '' || \$('#strength').html() =='Weak password' || \$('#strength').html() =='Too weak' || \$('#strength').html() =='Normal strength' ) {
-    \$('#Problem_dialog').dialog('open');
-    return ;
-   }
-if ( \$('#userfree').html()!='User name available' ){
-    \$('#Problem_dialog').dialog('open');
-    return ;
-   }
-if ( isValidEmailAddress(\$('#email_address').val()) == 0 ) {
-    \$('#Problem_dialog').dialog('open');
-    return ;
-   }
-\$('#Please_wait_dialog').dialog('open');
-\$.post('./register',{ username: \$('#username').val(), passphrase: \$('#passphrase').val(), email_address: \$('#email_address').val()},function(data){display_register(data)},'json');
-}
-
-
-                \$('#Login_button, #Register_button, #Help_button').button();
+                \$('#Login_button,#Help_button').button();
 				\$('#Buttons').buttonset();
 				\$('form').attr('autocomplete', 'off');
-				\$('#passphrase').password_strength({container:'#strength'});
-				\$('#passphrase_repeat').bind('input', function() { check_passwords_equal()});
-				\$('#passphrase').bind('input', function() { check_passwords_equal()});
-				\$('#username').change(function() {\$.post('./check_unused_username',{ username: \$('#username').val()},function(data){check_username(data)},'json')  });
-				\$('#email_address').change(function() {isValidEmailAddress(\$('#email_address').val())});		
 "
 %]
 [%  dialogs= [ {name='Problem',option="title: 'Invalid data'"},
-			   {name='Please_wait',option="title: 'Registering'"},
-			   {name='Result',option="title: 'Registered',close: function() {window.location.reload()} "} ] %]
+			   {name='Not_Validated',option="title: 'Email address not validated',close: function() {window.location.reload()} ,
+								buttons: { 'Resend Email' : function () {\$.post('./resend_email',{ username: \$('#login_username').val()});window.location.reload();},
+										   'Close' : function() {window.location.reload() }}"  },
+			   {name='Result',option="title: 'Login Issue',close: function() {window.location.reload()} "} ] %]
 [% FOREACH dialog IN dialogs %]
 [% SCRIPT="$SCRIPT
 				\$('div#${dialog.name}_dialog').dialog({
@@ -82,8 +41,7 @@ if ( isValidEmailAddress(\$('#email_address').val()) == 0 ) {
 
 [%  buttons= [
 {name='Help' , option="width:500"},
-{name='Register',option="width:500,buttons : { 'Register'  : function () {register()} }"},
-{name='Login',option="width:290,buttons : { 'Login'  : function () {} }"} 
+{name='Login',option="width:290,buttons : { 'Login'  : function () {login()} }"} 
 ] %]
 
 [% FOREACH button IN buttons %]
@@ -118,7 +76,6 @@ if ( isValidEmailAddress(\$('#email_address').val()) == 0 ) {
 						<br>
 						<div id="Buttons">
 						<span id="Login_button">Login</span>
-                        <span id="Register_button">Register</span>
                         <span id="Help_button">Help</span>
 						</div>
 						<br>
@@ -146,37 +103,19 @@ if ( isValidEmailAddress(\$('#email_address').val()) == 0 ) {
 </div>
 <div id="Login_dialog" title="Login">
 <div >
-<p>User Name: <input style= "width:inherit;float:right;"  type="text"   name="username" /></p>
+<p>User Name: <input style= "width:inherit;float:right;"  type="text"   name="login_username" id="login_username"/></p>
 </div>
 <div >
-<p>Pass Phrase: <input style= "width:inherit;float:right;"  type="text"   name="passphrase" /></p>
+<p>Pass Phrase: <input style= "width:inherit;float:right;"  type="password"   name="login_passphrase" id="login_passphrase" /></p>
 </div>
 </div>
-<div id="Register_dialog" title="Register">
-<div >
-<p>User Name: <input style= "width:inherit;float:right;"  type="text"   name="username" id="username" /><div style= "float:right;" id="userfree">Availability not checked.</div></p>
-</div>
-<br>
-<div >
-<p>Pass Phrase: <input id="passphrase" style= "width:inherit;float:right;"  type="password" name="passphrase" id="passphrase" /><div style= "float:right;" id="strength"></div></p>
-</div>
-<br>
-<div >
-<p>Pass Phrase (Again): <input style= "width:inherit;float:right;"  type="password" name="passphrase_repeat" id="passphrase_repeat" /><div style= "float:right;" id="duppassword">Passwords equal.</div></p>
-</div>
-<br>
-<div >
-<p>Email Address: <input style= "width:inherit;float:right;"  type="text"   name="email_address" id="email_address"  /><div style= "float:right;" id="emailvalid">Unvalidated email</div></p>
-</div>
-</div>
-<div id="Problem_dialog" title="Invalid data">
-<p>Please fix the problems show and attempt to register.</p>
-<p>A passphrase should be longer than six characters and contain a mix of uppercase and lowercase, numbers and symbols</p>
-</div>
-<div id="Please_wait_dialog" title="Regestering">
-<p>Please wait while you are registered</p>
-</div>
-<div id="Result_dialog" title="Registered">
+<div id="Result_dialog" title="Login Issue">
 <div id="Result_text"><p></p></div>
+</div>
+
+<div id="Not_Validated_dialog">
+<div id="Not_Validated_text"><p>You have yet to validate your email address, you can either try again later after validating your email address.</p>
+<p>Or you can have the email resent.</p>
+</div>
 </div>
 

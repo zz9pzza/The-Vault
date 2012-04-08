@@ -8,4 +8,4 @@ Uses the following debian packages
  libstring-random-perl 
  libdbix-class-perl
  libdbix-class-schema-loader-perl
-
+ libmime-lite-perl  

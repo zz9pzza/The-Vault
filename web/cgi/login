@@ -1,0 +1,73 @@
+#!/usr/bin/perl
+ 
+
+use strict;
+use warnings;
+use lib '/var/www/vault/cgi' ;
+
+
+ 
+use CGI  qw(:standard);
+use CGI::Carp qw(fatalsToBrowser);
+use String::Random;
+use Authen::Passphrase::BlowfishCrypt;
+use Error qw(:try);
+use Vault::core;
+
+
+
+use JSON;
+
+$| = 1;
+
+print header('application/json');
+my $vault = Vault::core->new();
+my $json = new JSON;
+$json = $json->pretty() ;
+$json = $json->ascii() ;
+my $username= param('username');
+my $passphrase=param('passphrase');
+my $jsonStructure;
+$jsonStructure->{result}="<p>who are you $username</p>";
+if ( !defined $username or !defined $passphrase) { 
+	$jsonStructure->{result}="<p>invalid input</p>";
+	$jsonStructure->{error}=1;
+	print  $json->encode($jsonStructure);
+	exit 0 ;
+}
+my $found_user=$vault->{schema}->resultset('User')->search ( {
+		'username' => $username
+		} )->single;
+# Set things up so we always try and do a passphrase auth so its not obvious the username is not found
+my $ppr ;
+my $cost=$vault->get_default_value('passphrase_cost',11);
+my $salt="DdyNUsteRJIRaeshJvVxr." ;
+my $hash="PALvbNKRVVp6nEg1SsrnNeHciQdLEAe";
+my $validation_string;
+if ( defined($found_user) and $found_user != 0 ) {
+  $cost=sprintf("%02d",$found_user->get_column('cost'));
+  $salt=$found_user->get_column('salt');
+  $hash=$found_user->get_column('hash');
+  $validation_string=$found_user->get_column('validation_string');
+  $ppr = Authen::Passphrase::BlowfishCrypt->from_crypt('$2a$'.$cost.'$'.$salt.$hash);
+  if($ppr->match($passphrase)) {
+	# Set some session
+    if ( $validation_string ne "VALID" ) {
+		$jsonStructure->{error}=2;
+    	$jsonStructure->{result}="<p>Please validate your email address</p>";
+	} else {
+  		$jsonStructure->{error}=0;
+		$jsonStructure->{result}="Welcome";
+	}
+  } else {
+	$jsonStructure->{error}=1 ;
+  }
+} else {
+  my $ppr = Authen::Passphrase::BlowfishCrypt->from_crypt('$2a$'.$cost.'$'.$salt.$hash);
+  $jsonStructure->{error}=1;
+}
+if ($jsonStructure->{error}==1) {
+	$jsonStructure->{result}="Login Incorrect";
+}
+print  $json->encode($jsonStructure);
+exit 0;

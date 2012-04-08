@@ -1,0 +1,29 @@
+#!/usr/bin/perl
+ 
+
+use strict;
+use warnings;
+use lib '/var/www/vault/cgi' ;
+
+
+ 
+use CGI  qw(:standard);
+use CGI::Carp qw(fatalsToBrowser);
+use Error qw(:try);
+use Vault::core;
+
+$| = 1;
+
+print header('application/json');
+
+my $vault = Vault::core->new();
+my $validation_string= param('validation_string');
+my $found_user=$vault->{schema}->resultset('User')->search ( {
+		'validation_string' => $validation_string
+		} )->single;
+if ( defined($found_user) and $found_user != 0 ) {
+	# Found the right user.
+	exit 0;
+}
+
+exit 0 ;

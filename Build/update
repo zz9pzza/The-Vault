@@ -1,0 +1,3 @@
+#!/bin/sh
+BASE=/root/The-Vault/
+rsync -av $BASE/templates/*  /home/vault/templa

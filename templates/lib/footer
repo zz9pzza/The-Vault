@@ -1,10 +1,6 @@
 <div id="footer"></div>
-
-        <link type="text/css" href="/vault//css/ui-lightness/jquery-ui-1.8.18.custom.css" rel="stylesheet" />   
-	    <link type="text/css" href="/vault/css/3-column_mode.css" rel="stylesheet" />
         <script type="text/javascript" src="/vault/js/jquery-1.7.1.min.js"></script>
         <script type="text/javascript" src="/vault/js/jquery-ui-1.8.18.custom.min.js"></script>
-	    <script type="text/javascript" src="/vault/js/jquery.corner.js"></script>
 		[% LOAD %]
         <script type="text/javascript">
             $(function(){
