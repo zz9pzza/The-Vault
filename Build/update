@@ -1,3 +1,4 @@
 #!/bin/sh
 BASE=/root/The-Vault/
 rsync -av $BASE/templates/*  /home/vault/templa
+rsync -av $BASE/web/*		 /var/www/vault/
