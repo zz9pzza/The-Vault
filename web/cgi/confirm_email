@@ -17,7 +17,7 @@ $| = 1;
 my $vault = Vault::core->new();
 my $validation_string= param('validation_string');
 if ($validation_string eq 'VALID' ) {
-	print 'Location: '.$vault->get_default_value('cgi_path')."/index.cgi?notregisted\n" ;
+	print 'Location: '.$vault->get_default_value('cgi_path')."/index.cgi?notregisted\n\n" ;
 	exit 0 ;
 }
 
@@ -27,8 +27,8 @@ my $found_user=$vault->{schema}->resultset('User')->search ( {
 if ( defined($found_user) and $found_user != 0 ) {
 	# Found the right user.
 	$found_user->update( { 'validation_string' => 'VALID' } );
-	print 'Location: '.$vault->get_default_value('cgi_path')."/index.cgi?registed\n" ;
+	print 'Location: '.$vault->get_default_value('cgi_path')."/index.cgi?registed\n\n" ;
 	exit 0;
 }
-print 'Location: '.$vault->get_default_value('cgi_path')."/index.cgi?notregisted\n" ;
+print 'Location: '.$vault->get_default_value('cgi_path')."/index.cgi?notregisted\n\n" ;
 exit 0 ;
