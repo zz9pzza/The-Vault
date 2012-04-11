@@ -10,7 +10,7 @@
 <!--  <link type="text/css" href="/vault/css/ui-lightness/jquery-ui-1.8.18.custom.css" rel="stylesheet" />
      <link type="text/css" href="/vault/css/3-column_mode.css" rel="stylesheet" />
 -->
-	 <link type="text/css" href="/vault/css/combined.css" rel="stylesheet" />
+	 <link type="text/css" href="/vault/css/ui-lightness/combined.css" rel="stylesheet" />
  </head>
  
  <body bgcolor="[% site.col.back %]" 

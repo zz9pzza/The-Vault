@@ -28,6 +28,12 @@ my $vars = {
 #--------------------------------------------------
 # application
 #--------------------------------------------------
+my  $script_add= '';
+my  $html_add= '';
+my $registered_state='' ;
+if ( defined $cgi->param('registered_state' ) ) {
+	$registered_state=$cgi->param('registered_state' )  ;
+}
  
 if ($param = $cgi->param('name')) {
     $vars->{ entry } = "test";
@@ -35,6 +41,14 @@ if ($param = $cgi->param('name')) {
 }
 else {
     $template = 'login.html';
+    if ( $registered_state eq 'notregisted' ) {
+    	$script_add= '';
+    	$html_add= '';
+	} 
+    if ( $registered_state eq 'registed' ) {
+        $script_add= '';
+        $html_add= '';
+        }
 }
  
 #------------------------------------------------------------------------

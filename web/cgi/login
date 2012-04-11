@@ -9,6 +9,7 @@ use lib '/var/www/vault/cgi' ;
  
 use CGI  qw(:standard);
 use CGI::Carp qw(fatalsToBrowser);
+use CGI::Session qw/-ip-match/;
 use String::Random;
 use Authen::Passphrase::BlowfishCrypt;
 use Error qw(:try);
@@ -20,26 +21,30 @@ use JSON;
 
 $| = 1;
 
-print header('application/json');
 my $vault = Vault::core->new();
 my $json = new JSON;
+my $cgi = new CGI ;
 $json = $json->pretty() ;
 $json = $json->ascii() ;
-my $username= param('username');
-my $passphrase=param('passphrase');
+my $username= $cgi->param('username');
+my $passphrase=$cgi->param('passphrase');
 my $jsonStructure;
-$jsonStructure->{result}="<p>who are you $username</p>";
 if ( !defined $username or !defined $passphrase) { 
 	$jsonStructure->{result}="<p>invalid input</p>";
 	$jsonStructure->{error}=1;
 	print  $json->encode($jsonStructure);
+	$vault->log_event("login invalid input",$Vault::core::LOG_FATAL) ;
 	exit 0 ;
 }
+
+$vault->log_event("login $username attempt",$Vault::core::LOG_APP_INFORM);
 my $found_user=$vault->{schema}->resultset('User')->search ( {
 		'username' => $username
 		} )->single;
 # Set things up so we always try and do a passphrase auth so its not obvious the username is not found
 my $ppr ;
+my $cookie;
+my $session;
 my $cost=$vault->get_default_value('passphrase_cost',11);
 my $salt="DdyNUsteRJIRaeshJvVxr." ;
 my $hash="PALvbNKRVVp6nEg1SsrnNeHciQdLEAe";
@@ -54,10 +59,17 @@ if ( defined($found_user) and $found_user != 0 ) {
 	# Set some session
     if ( $validation_string ne "VALID" ) {
 		$jsonStructure->{error}=2;
-    	$jsonStructure->{result}="<p>Please validate your email address</p>";
+    		$jsonStructure->{result}="<p>Please validate your email address</p>";
+		$vault->log_event("login $username unvalidated email",$Vault::core::LOG_APP_INFORM,$found_user->get_column('userid'));
 	} else {
   		$jsonStructure->{error}=0;
 		$jsonStructure->{result}="Welcome";
+		CGI::Session->name("VAULTID");
+		$session = new CGI::Session("driver:MySQL", undef, {Handle=>$vault->dbi()});
+		$vault->log_event("login $username success,session key ".$session->id,$Vault::core::LOG_APP_INFORM,$found_user->get_column('userid'));
+		$cookie = $cgi->cookie(VAULTID => $session->id);
+		$session->param("username", $username);
+		$session->flush() or die $session->error();
 	}
   } else {
 	$jsonStructure->{error}=1 ;
@@ -68,6 +80,12 @@ if ( defined($found_user) and $found_user != 0 ) {
 }
 if ($jsonStructure->{error}==1) {
 	$jsonStructure->{result}="Login Incorrect";
+	$vault->log_event("login $username failed",$Vault::core::LOG_APP_INFORM);
+}
+if ( defined $cookie ) {
+	print $cgi->header( -cookie=>$cookie,-type=>'application/json' );
+} else {
+	print $cgi->header( -type=>'application/json' );
 }
 print  $json->encode($jsonStructure);
 exit 0;

@@ -1,4 +1,5 @@
 #!/bin/sh
 BASE=/root/The-Vault/
-rsync -av $BASE/templates/*  /home/vault/templa
-rsync -av $BASE/web/*		 /var/www/vault/
+rsync -av $BASE/templates/*  /home/vault/templates
+rsync -av $BASE/web/*		 /var/www/vault
+( cd  /var/www/vault/cgi/ ;  dbicdump -o dump_directory=.  -o preserve_case=1   -o components='["InflateColumn::DateTime"]'  VaultDB::Schema dbi:mysql:vault vault  this_is_not_a_real_password )
