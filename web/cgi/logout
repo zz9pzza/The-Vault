@@ -1,0 +1,22 @@
+#!/usr/bin/perl
+ 
+use strict;
+use warnings;
+ 
+use CGI;
+use CGI::Carp qw(fatalsToBrowser);
+use CGI::Session qw/-ip-match/;
+use Vault::core;
+use Template;
+$| = 1;
+ 
+#--------------------------------------------------
+# configuration
+#--------------------------------------------------
+ 
+my $cgi = CGI->new(  );
+my $vault = Vault::core->new();
+my $cookie=$cgi->cookie("VAULTID") || undef;
+my $session = new CGI::Session("driver:MySQL", $cookie, {Handle=>$vault->dbi()});
+$session->delete();
+exit 0;

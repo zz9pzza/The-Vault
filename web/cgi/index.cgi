@@ -19,17 +19,15 @@ my $ROOTURL = 'https://stage.transformativeworks.org/';
 my $ROOTCGI = '/vault_cgi/index.cgi';
  
 my $cgi = CGI->new(  );
-my ($param, $template,$cookie,$session,$vault);
+my ($param, $template,$cookie,$session,$vault,$menu,$time_to_expire);
  
 #--------------------------------------------------
 # application
 #--------------------------------------------------
 my  $script_add= '';
 my  $html_add= '';
-my $registered_state='' ;
-if ( defined $cgi->param('registered_state' ) ) {
-	$registered_state=$cgi->param('registered_state' )  ;
-}
+$menu=1;
+$vault = Vault::core->new();
 # Set the default action to be the login page.
 my $action='display_login_page';
 if ( defined $cgi->param('action') ) {
@@ -38,10 +36,11 @@ if ( defined $cgi->param('action') ) {
  
 if ( $action eq 'display_login_page' ) {
     $template = 'login.html';
+    $menu=0;
 } else {
-   $vault = Vault::core->new();
    $cookie=$cgi->cookie("VAULTID") || undef;
    $session = new CGI::Session("driver:MySQL", $cookie, {Handle=>$vault->dbi()});
+   $time_to_expire=$session->atime()+$session->expire()-time;
    # Display an error if we do not have a valid session
    if ( !defined ( $session->param("username") ) ) {
 	$vault->log_event("Attempt to access $action with no session( $cookie )",$Vault::core::LOG_APP_INFORM);
@@ -51,7 +50,7 @@ if ( $action eq 'display_login_page' ) {
 
 }
 if ( $action eq 'front_page' ) {
-	$template = 'front_page.html';
+	$template = 'file_view.html';
 }
 
 
@@ -61,6 +60,9 @@ my $vars = {
     rootcgi => $ROOTCGI,
     script_add => $script_add,
     html_add => $html_add,
+    footer_text => $vault->get_default_value('footer_text','NONE'),
+    menu => $menu,
+    time_to_expire => $time_to_expire,
 };
 
  

@@ -10,6 +10,7 @@ use lib '/var/www/vault/cgi' ;
 use CGI  qw(:standard);
 use CGI::Carp qw(fatalsToBrowser);
 use CGI::Session qw/-ip-match/;
+use CGI::Cookie;
 use String::Random;
 use Authen::Passphrase::BlowfishCrypt;
 use Error qw(:try);
@@ -69,7 +70,7 @@ if ( defined($found_user) and $found_user != 0 ) {
 		CGI::Session->name("VAULTID");
 		$session = new CGI::Session("driver:MySQL", undef, {Handle=>$vault->dbi()});
 		$vault->log_event("login $username success,session key ".$session->id,$Vault::core::LOG_APP_INFORM,$found_user->get_column('userid'));
-		$cookie = $cgi->cookie(VAULTID => $session->id);
+		$cookie =  CGI::Cookie->new(-name=>'VAULTID',-value=> $session->id,-expires => '+'.$timeout.'s',-secure  =>  1);
 		$session->param("username", $username);
 		$session->expire($timeout);   
 		$session->flush() or die $session->error();

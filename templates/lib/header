@@ -1,4 +1,40 @@
+[% IF menu == 0 %]
 <div id="header" style="text-align:center;background-color:#000000;">
 		<img src="http://transformativeworks.org/sites/all/themes/cavatica/images/otwname.png">
 </div>
+[% ELSE %]
+        <div class="ui-menubar">
+            <div class="fill">
+                <div class="ui-container">
+                    <a class="brand" href="#">The Vault</a>
+                    <ul class="nav">
+                        <li class="ui-state-active"><a href="#masthead">View Files</a></li>
+                        <li><a href="#uploadfile">Upload File</a></li>
+                        <li><a href="#groupadmin">Group Admin</a></li>
+                        <li><a href="#useradmin">User Admin</a></li>
+                        <li><a href="#about">About</a></li>
+                        <li><a href="#help">Help</a></li>
+                        <li><a id='logout' href="javascript:void(0);">Logout</a></li>
+		        <li><span class="ui-state-disabled">Logout in :</span></li>
+			<li><span class="ui-state-disabled"><div id="timetologout"></div></span></li>
+		    </ul>
+                </div>
+            </div>
+        </div>
+[% LOAD= "$LOAD
+<script type='text/javascript' src='/vault/js/jquery.countdown.js'></script>
+" %]
+[% SCRIPT="$SCRIPT
+function delete_cookie(cookie_name) {
+document.cookie = cookie_name + '=; expires=Thu, 01-Jan-70 00:00:01 GMT;';
+}
+	\$('#timetologout').countdown({until: +${time_to_expire},format: 'MS',compact: true,expiryUrl: './index.cgi'});
+	\$('#logout').click(function() {
+                window.location = '${rooturl}${rootcgi}';
+		delete_cookie('VAULTID');
+		\$.post('./logout',{ },function(){},'json') ;
+        });
+" %]
+
+[%END%]
 
