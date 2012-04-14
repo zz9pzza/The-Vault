@@ -48,11 +48,13 @@ my $session;
 my $cost=$vault->get_default_value('passphrase_cost',11);
 my $salt="DdyNUsteRJIRaeshJvVxr." ;
 my $hash="PALvbNKRVVp6nEg1SsrnNeHciQdLEAe";
+my $timeout=900;
 my $validation_string;
 if ( defined($found_user) and $found_user != 0 ) {
   $cost=sprintf("%02d",$found_user->get_column('cost'));
   $salt=$found_user->get_column('salt');
   $hash=$found_user->get_column('hash');
+  $timeout=$found_user->get_column('timeout');
   $validation_string=$found_user->get_column('validation_string');
   $ppr = Authen::Passphrase::BlowfishCrypt->from_crypt('$2a$'.$cost.'$'.$salt.$hash);
   if($ppr->match($passphrase)) {
@@ -69,6 +71,7 @@ if ( defined($found_user) and $found_user != 0 ) {
 		$vault->log_event("login $username success,session key ".$session->id,$Vault::core::LOG_APP_INFORM,$found_user->get_column('userid'));
 		$cookie = $cgi->cookie(VAULTID => $session->id);
 		$session->param("username", $username);
+		$session->expire($timeout);   
 		$session->flush() or die $session->error();
 	}
   } else {

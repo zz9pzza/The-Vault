@@ -5,6 +5,8 @@ use warnings;
  
 use CGI;
 use CGI::Carp qw(fatalsToBrowser);
+use CGI::Session qw/-ip-match/;
+use Vault::core;
 use Template;
 $| = 1;
  
@@ -14,16 +16,10 @@ $| = 1;
  
 my $ROOTDIR = '/home/vault';
 my $ROOTURL = 'https://stage.transformativeworks.org/';
-my $ROOTCGI = '/vault_cgi/index2.cgi';
+my $ROOTCGI = '/vault_cgi/index.cgi';
  
 my $cgi = CGI->new(  );
- 
-my ($param, $template);
-my $vars = { 
-    rootdir => $ROOTDIR,
-    rooturl => $ROOTURL,
-    rootcgi => $ROOTCGI,
-};
+my ($param, $template,$cookie,$session,$vault);
  
 #--------------------------------------------------
 # application
@@ -34,22 +30,39 @@ my $registered_state='' ;
 if ( defined $cgi->param('registered_state' ) ) {
 	$registered_state=$cgi->param('registered_state' )  ;
 }
+# Set the default action to be the login page.
+my $action='display_login_page';
+if ( defined $cgi->param('action') ) {
+	$action=$cgi->param('action') ;
+}
  
-if ($param = $cgi->param('name')) {
-    $vars->{ entry } = "test";
-    $template = 'entry.html';
-}
-else {
+if ( $action eq 'display_login_page' ) {
     $template = 'login.html';
-    if ( $registered_state eq 'notregisted' ) {
-    	$script_add= '';
-    	$html_add= '';
-	} 
-    if ( $registered_state eq 'registed' ) {
-        $script_add= '';
-        $html_add= '';
-        }
+} else {
+   $vault = Vault::core->new();
+   $cookie=$cgi->cookie("VAULTID") || undef;
+   $session = new CGI::Session("driver:MySQL", $cookie, {Handle=>$vault->dbi()});
+   # Display an error if we do not have a valid session
+   if ( !defined ( $session->param("username") ) ) {
+	$vault->log_event("Attempt to access $action with no session( $cookie )",$Vault::core::LOG_APP_INFORM);
+	print 'Location: '.$vault->get_default_value('cgi_path')."/index.cgi\n\n" ;
+	exit 0 ;
+   }
+
 }
+if ( $action eq 'front_page' ) {
+	$template = 'front_page.html';
+}
+
+
+my $vars = {
+    rootdir => $ROOTDIR,
+    rooturl => $ROOTURL,
+    rootcgi => $ROOTCGI,
+    script_add => $script_add,
+    html_add => $html_add,
+};
+
  
 #------------------------------------------------------------------------
 # presentation

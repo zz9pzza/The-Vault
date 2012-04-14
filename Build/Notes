@@ -1,0 +1,1 @@
+echo hello |  /usr/bin/openssl genrsa  -aes256 -passout fd:0  4096

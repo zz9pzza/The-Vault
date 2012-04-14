@@ -6,10 +6,13 @@ function process_login(data) {
 \$('#Login_dialog').dialog('close');
 if ( data.error == 2 ) {
   \$('#Not_Validated_dialog').dialog('open');
-  } else {
-   \$('#Result_text').html(data.result);
-   \$('#Result_dialog').dialog('open');
-  }
+  } 
+if ( data.error == 1 ) {
+  \$('#Login_incorrect_dialog').dialog('open');
+  } 
+if (  data.error == 0 ) {
+  window.location = '${rooturl}${rootcgi}?action=front_page';
+ }
 }
 
 function login () {
@@ -25,6 +28,7 @@ function login () {
 			   {name='Not_Validated',option="title: 'Email address not validated',close: function() {window.location.reload()} ,
 								buttons: { 'Resend Email' : function () {\$.post('./resend_email',{ username: \$('#login_username').val()});window.location.reload();},
 										   'Close' : function() {window.location.reload() }}"  },
+                           {name='Login_incorrect',option="title: 'Login Failed',close: function() {window.location.reload()}"} ,
 			   {name='Result',option="title: 'Login Issue',close: function() {window.location.reload()} "} ] %]
 [% FOREACH dialog IN dialogs %]
 [% SCRIPT="$SCRIPT
@@ -62,7 +66,7 @@ function login () {
 " %]
 [% END %]
 [% INCLUDE "base_lock.html" %]
-
+<span style="display: none;">
 <div id="Help_dialog" title="Help">
 <p>The vault is a system used by the OTW to securely distribute files to its staff</p>
 <p>When you register, you must specify a username, passphrase, and e-mail address to attach to the account. This will create the private key for your account.</p>
@@ -86,5 +90,9 @@ function login () {
 <div id="Not_Validated_text"><p>You have yet to validate your email address, you can either try again later after validating your email address.</p>
 <p>Or you can have the email resent.</p>
 </div>
+<div id="Login_incorrect_dialog">
+<div id="Login_incorrect_text"><p>Login Failed</p>
 </div>
 
+</div>
+</span>
