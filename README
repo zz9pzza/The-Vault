@@ -9,3 +9,4 @@ Uses the following debian packages
  libdbix-class-perl
  libdbix-class-schema-loader-perl
  libmime-lite-perl  
+ libcgi-session-expiresessions-perl 

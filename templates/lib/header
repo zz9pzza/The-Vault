@@ -10,30 +10,55 @@
                     <ul class="nav">
                         <li class="ui-state-active"><a href="#masthead">View Files</a></li>
                         <li><a href="#uploadfile">Upload File</a></li>
+                        <li><a href="#preferences">Preferences</a></li>
                         <li><a href="#groupadmin">Group Admin</a></li>
                         <li><a href="#useradmin">User Admin</a></li>
-                        <li><a href="#about">About</a></li>
                         <li><a href="#help">Help</a></li>
                         <li><a id='logout' href="javascript:void(0);">Logout</a></li>
-		        <li><span class="ui-state-disabled">Logout in :</span></li>
-			<li><span class="ui-state-disabled"><div id="timetologout"></div></span></li>
+		        <li><a id='refresh'  href="javascript:void(0);">Logout in :</a></li>
+			<li><a id='refresh1' href="javascript:void(0);"><div id="timetologout"></div></a></li>
 		    </ul>
                 </div>
             </div>
         </div>
+   <div class="ui-container">
+      <div class="content">
+        <div class="page-header">
+          <h1>Welcome  [%username%]</h1>
+        </div>
+
+
 [% LOAD= "$LOAD
 <script type='text/javascript' src='/vault/js/jquery.countdown.js'></script>
+<script type='text/javascript' src='/vault/js/jquery.cookie.js'></script>
 " %]
 [% SCRIPT="$SCRIPT
 function delete_cookie(cookie_name) {
 document.cookie = cookie_name + '=; expires=Thu, 01-Jan-70 00:00:01 GMT;';
 }
-	\$('#timetologout').countdown({until: +${time_to_expire},format: 'MS',compact: true,expiryUrl: './index.cgi'});
-	\$('#logout').click(function() {
-                window.location = '${rooturl}${rootcgi}';
-		delete_cookie('VAULTID');
-		\$.post('./logout',{ },function(){},'json') ;
-        });
+
+function refresh_cookie(data) {
+  var date = new Date();
+  value=\$.cookie('VAULTID')
+  \$('#timetologout').countdown('change', {until: +(data.timeout-2)});
+  date.setTime(date.getTime() + (data.timeout * 1000));
+  \$.cookie('VAULTID', value, { expires: date, path: '/',secure:1 });
+}
+
+function refresh_timer () {
+	\$.post('./refresh_cookie',{},function(data){refresh_cookie(data)},'json');
+}
+
+function logout () {
+                delete_cookie('VAULTID');
+                window.location = '${rooturl}logout';
+}
+
+	<!-- If we logout at the right time we will have lost the session and will fail to delete from the database -->
+	\$('#timetologout').countdown({until: +(${time_to_expire}-2),format: 'MS',compact: true, onExpiry: logout});
+	\$('#refresh').click(function(){refresh_timer()});
+	\$('#refresh1').click(function(){refresh_timer()});
+	\$('#logout').click(function(){logout()});
 " %]
 
 [%END%]

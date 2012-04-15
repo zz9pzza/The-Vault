@@ -10,6 +10,7 @@ use Carp;
 use Readonly;
 use Error qw(:try);
 use Data::Dumper ;
+use CGI::Session::ExpireSessions;
 
 Readonly our $LOG_FATAL      => '1000';
 Readonly our $LOG_APP_INFORM => '0800';
@@ -39,6 +40,7 @@ sub new {
     );
 	
     $self->{'dbi'}=DBI->connect ($dsn,$self->{'settings'}->{database},$self->{'settings'}->{password}) ;
+    CGI::Session::ExpireSessions -> new(dbh => $self->{'dbi'},delta=>2*60*60) -> expire_db_sessions();
 
     bless $self, $class;
     return $self;

@@ -21,13 +21,14 @@ use JSON;
 $| = 1;
 
 my $vault = Vault::core->new();
+my $cgi = new CGI ;
 my $passphrase=param('passphrase');
 my $ppr = Authen::Passphrase::BlowfishCrypt->new(
                 cost => $vault->get_default_value('passphrase_cost',11), salt_random => 1,
                 passphrase => $passphrase);
 my $salt=$ppr->salt_base64;
 my $hash=$ppr->hash_base64;
-print header('application/json');
+print $cgi->header('application/json');
 my $json = new JSON;
 $json = $json->pretty() ;
 $json = $json->ascii() ;

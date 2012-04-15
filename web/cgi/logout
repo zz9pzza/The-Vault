@@ -18,5 +18,7 @@ my $cgi = CGI->new(  );
 my $vault = Vault::core->new();
 my $cookie=$cgi->cookie("VAULTID") || undef;
 my $session = new CGI::Session("driver:MySQL", $cookie, {Handle=>$vault->dbi()});
+$vault->log_event('User: '.$session->param("username").' Session id ' .$cookie .' logged out',$Vault::core::LOG_INFO) ;
 $session->delete();
+print 'Location: '.$vault->get_default_value('cgi_path')."/index.cgi\n\n" ;
 exit 0;

@@ -14,9 +14,10 @@ use Vault::core;
 
 $| = 1;
 
-print header('application/json');
-
 my $vault = Vault::core->new();
+my $cgi = new CGI ;
+print $cgi->header('application/json');
+
 my $username= param('username');
 my $found_user=$vault->{schema}->resultset('User')->search ( {
 		'username' => $username
