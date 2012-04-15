@@ -1,0 +1,36 @@
+#!/usr/bin/perl
+ 
+use strict;
+use warnings;
+ 
+use CGI;
+use CGI::Carp qw(fatalsToBrowser);
+use CGI::Session qw/-ip-match/;
+use Vault::core;
+use Template;
+use JSON;
+
+$| = 1;
+ 
+#--------------------------------------------------
+# configuration
+#--------------------------------------------------
+ 
+my $cgi = CGI->new(  );
+my $json = new JSON;
+my $jsonStructure;
+my $vault = Vault::core->new();
+my $cookie=$cgi->cookie("VAULTID") || undef;
+my $session = new CGI::Session("driver:MySQL", $cookie, {Handle=>$vault->dbi()});
+$json = $json->pretty() ;
+$json = $json->ascii() ;
+my $user_info = $vault->{schema}->resultset('User')->search ( {
+		'username' =>$session->param("username") } )->single;
+my $timeout=$user_info->get_column('timeout');
+$vault->log_event('User '.$user_info->get_column('username').' refreshed cookie' ,$Vault::core::LOG_APP_INFORM);
+$jsonStructure->{timeout}=$timeout;
+$session->expire($timeout); 
+$session->flush();
+print $cgi->header( -type=>'application/json' );
+print  $json->encode($jsonStructure);
+exit 0;
