@@ -11,9 +11,13 @@
                         <li class="ui-state-active"><a href="#masthead">View Files</a></li>
                         <li><a href="#uploadfile">Upload File</a></li>
                         <li><a href="#preferences">Preferences</a></li>
-                        <li><a href="#groupadmin">Group Admin</a></li>
-                        <li><a href="#useradmin">User Admin</a></li>
-                        <li><a href="#help">Help</a></li>
+		[% IF group_admin != 0 %]
+                        <li><a href="./index.cgi?action=group_admin">Group Admin</a></li>
+		[% END %]
+		[% IF user_admin != 0 %]
+                        <li><a href="./index.cgi?action=user_admin">User Admin</a></li>
+		[% END %]
+                        <li><a id='help' href="javascript:void(0);">Help</a></li>
                         <li><a id='logout' href="javascript:void(0);">Logout</a></li>
 		        <li><a id='refresh'  href="javascript:void(0);">Logout in :</a></li>
 			<li><a id='refresh1' href="javascript:void(0);"><div id="timetologout"></div></a></li>
@@ -26,7 +30,11 @@
         <div class="page-header">
           <h1>Welcome  [%username%]</h1>
         </div>
-
+<span style="display: none;">
+<div id="Help_dialog" title="Help">
+[% help_text %]
+</div>
+</span>
 
 [% LOAD= "$LOAD
 <script type='text/javascript' src='/vault/js/jquery.countdown.js'></script>
@@ -54,11 +62,24 @@ function logout () {
                 window.location = '${rooturl}logout';
 }
 
+function help () {
+	refresh_timer () ;
+	\$('div#Help_dialog').dialog('open');
+}
+
 	<!-- If we logout at the right time we will have lost the session and will fail to delete from the database -->
 	\$('#timetologout').countdown({until: +(${time_to_expire}-2),format: 'MS',compact: true, onExpiry: logout});
 	\$('#refresh').click(function(){refresh_timer()});
 	\$('#refresh1').click(function(){refresh_timer()});
 	\$('#logout').click(function(){logout()});
+	\$('#help').click(function(){help()});
+	\$('div#Help_dialog').dialog({
+                    autoOpen: false,
+                    show: 'highlight',
+                    hide: 'highlight',
+                    modal: true
+                    });
+
 " %]
 
 [%END%]

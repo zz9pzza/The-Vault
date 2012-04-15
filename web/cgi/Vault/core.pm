@@ -118,7 +118,7 @@ sub log_event {
 	my $new_event = $self->{schema}->resultset('Event')->create(
 	    {
 		userid   => $userid,
-		text     => $text,
+		text     => $self->{dbi}->quote($text),
 		stamp    => time,
 		priority => $priority
 	    }
